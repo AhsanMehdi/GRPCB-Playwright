@@ -1,10 +1,13 @@
+/*
+ -  dependencies
+*/
 import { test, expect, request } from '@playwright/test';
-
+// defining base url
 const baseURL = 'https://grpcb.in'; // Adjust the domain/port if necessary.
-
+// test suite for separate api
 test.describe('ABitOfEverythingService HTTP tests', () => {
   let apiContext;
-
+  // hook to load the api url
   test.beforeAll(async () => {
     apiContext = await request.newContext({ baseURL });
   });
@@ -62,17 +65,17 @@ test.describe('ABitOfEverythingService HTTP tests', () => {
     const lookupBody2 = await lookupResponse2.json();
     expect(lookupBody2.string_value).toBe("updated-hello");
 
-    // Delete the created resource.
+    // delete the created resource
     const deleteResponse = await apiContext.delete(`/v1/example/a_bit_of_everything/${uuid}`);
     expect([200, 204]).toContain(deleteResponse.status());
 
-    // Lookup after delete – expect a 404 (or another error code indicating missing resource).
+    // expect 404 -  assertion to verify delete operation
     const lookupResponse3 = await apiContext.get(`/v1/example/a_bit_of_everything/${uuid}`);
     expect(lookupResponse3.status()).toBe(404);
   });
 
   test('Echo method', async () => {
-    // Test Echo via GET: /v1/example/a_bit_of_everything/echo/{value}
+
     const echoValue = 'echo-test';
     const echoResponse = await apiContext.get(`/v1/example/a_bit_of_everything/echo/${echoValue}`);
     expect(echoResponse.status()).toBe(200);
@@ -80,10 +83,8 @@ test.describe('ABitOfEverythingService HTTP tests', () => {
     // Assuming the response is a JSON object like { "value": "echo-test" }
     expect(echoBody.value).toBe(echoValue);
   });
-
+// post method
   test('DeepPathEcho method', async () => {
-    // For DeepPathEcho:
-    // POST /v1/example/a_bit_of_everything/{single_nested.name}
     const nestedName = "deepEcho";
     const deepPayload = {
       uuid: "dummy-uuid",
@@ -98,36 +99,36 @@ test.describe('ABitOfEverythingService HTTP tests', () => {
     const deepBody = await deepResponse.json();
     expect(deepBody.single_nested.name).toBe(nestedName);
   });
-
+  // get to check timeout
   test('Timeout method', async () => {
-    // GET /v2/example/timeout
+
     const timeoutResponse = await apiContext.get('/v2/example/timeout');
     expect(timeoutResponse.status()).toBe(200);
   });
-
+  // simple get method
   test('ErrorWithDetails method', async () => {
-    // GET /v2/example/errorwithdetails should return an error.
+
     const errorResponse = await apiContext.get('/v2/example/errorwithdetails');
     // Check that the response is not successful (e.g. 4xx or 5xx).
     expect(errorResponse.status()).not.toBe(200);
   });
-
+// get method
   test('GetMessageWithBody method', async () => {
-    // POST /v2/example/withbody/{id} with body "data"
+
     const id = "msg-1";
-    const dataPayload = { name: "test" };  // According to MessageWithBody: { id, data: { name } }
+    const dataPayload = { name: "test" };  
     const messageResponse = await apiContext.post(`/v2/example/withbody/${id}`, {
       data: dataPayload,
       headers: { 'Content-Type': 'application/json' }
     });
     expect(messageResponse.status()).toBe(200);
   });
-
+// check empty body
   test('PostWithEmptyBody method', async () => {
-    // POST /v2/example/postwithemptybody/{name}
+
     const nameParam = "emptyBodyTest";
     const postResponse = await apiContext.post(`/v2/example/postwithemptybody/${nameParam}`, {
-      data: {}, // Empty body (or you can omit "data")
+      data: {}, 
       headers: { 'Content-Type': 'application/json' }
     });
     expect(postResponse.status()).toBe(200);

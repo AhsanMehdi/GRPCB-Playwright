@@ -20,12 +20,15 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 });
 
 const proto = grpc.loadPackageDefinition(packageDefinition) as any;
-
+// client setup with port
 const client = new proto.grpcbin.ABitOfEverythingService(
   'grpcb.in:9000',
   grpc.credentials.createInsecure()
 );
 
+/*
+-   method responsible for the client create
+*/
 export function callCreate(payload: any) {
   return new Promise((resolve, reject) => {
     client.Create(payload, (err: any, response: any) => {
